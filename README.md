@@ -61,3 +61,8 @@ I have also tried to, given a minimum and maximum track angle corners, draw kerb
 2. Improve and tune subsystems. Play with parameters. 
 3. Divide surface in a grid
 4. Refactor code
+
+## IGVC
+
+- **IGVC parameters:** `constants.py` now includes IGVC-relevant parameters (course dimensions, speed limits, run time, pixels-per-foot, etc.).
+- **Scale marker:** generated `track.png` includes parking spot rectangles and a small scale bar to help visualize real-world sizes (parking spot ~9x18 ft).

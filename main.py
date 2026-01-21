@@ -186,6 +186,26 @@ def draw_track(surface, color, points, corners):
         pygame.draw.circle(track_chunk, color, (radius, radius), radius)
         surface.blit(track_chunk, blit_pos)
 
+def draw_parking_spots(surface, count=4, start_x=10, margin=10):
+    # draw a row of parking spots in the bottom-left corner for scale
+    spot_w = max(1, int(PARKING_SPOT_WIDTH_FT * PIXELS_PER_FOOT))
+    spot_h = max(1, int(PARKING_SPOT_LENGTH_FT * PIXELS_PER_FOOT))
+    y = HEIGHT - margin - spot_h
+    x = start_x
+    spacing = 8
+    for i in range(count):
+        rect = pygame.Rect(x + i * (spot_w + spacing), y, spot_w, spot_h)
+        pygame.draw.rect(surface, PARKING_SPOT_COLOR, rect, 2)
+    # draw a small label-like scale bar (no font needed)
+    bar_w = max(1, int(10 * PIXELS_PER_FOOT))
+    bar_h = 4
+    bar_x = start_x
+    bar_y = y - margin - bar_h
+    pygame.draw.rect(surface, PARKING_SPOT_COLOR, (bar_x, bar_y, bar_w, bar_h))
+    # draw bar endpoints
+    pygame.draw.line(surface, PARKING_SPOT_COLOR, (bar_x, bar_y - 4), (bar_x, bar_y + bar_h + 4), 1)
+    pygame.draw.line(surface, PARKING_SPOT_COLOR, (bar_x + bar_w, bar_y - 4), (bar_x + bar_w, bar_y + bar_h + 4), 1)
+
 def draw_rectangle(dimensions, color, line_thickness=1, fill=False):
     filled = line_thickness
     if fill:
@@ -359,6 +379,8 @@ def main(debug=True, draw_checkpoints_in_track=True):
         draw_points(screen, BLACK, f_points)
 
     pygame.display.set_caption(TITLE)
+    # add parking spots and a small scale marker to the image for IGVC reference
+    draw_parking_spots(screen, count=4)
     # Save the screen to PNG and SVG files
     pygame.image.save(screen, "track.png")
     save_track_svg(f_points)

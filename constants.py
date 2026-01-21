@@ -83,3 +83,37 @@ COOL_TRACK_SEEDS = [
     95894, 
     95521
 ]
+
+###
+# IGVC-specific parameters
+###
+# Course dimensions (approximate, in feet)
+COURSE_LENGTH_FT = 500
+COURSE_AREA_WIDTH_FT = 120
+COURSE_AREA_DEPTH_FT = 100
+
+# Track width limits (feet)
+TRACK_WIDTH_MIN_FT = 10
+TRACK_WIDTH_MAX_FT = 20
+
+# Minimum turning radius (feet)
+TURN_RADIUS_MIN_FT = 5
+
+# Maximum ramp gradient (%)
+RAMP_MAX_GRADE_PERCENT = 15
+
+# Speed limits (mph)
+MIN_SPEED_MPH = 1
+MAX_SPEED_MPH = 5
+
+# Run time limit (minutes)
+RUN_TIME_MINUTES = 6
+
+# A simple conversion from canvas pixels to feet based on the IGVC area width
+# This can be used to draw a scale or elements sized in feet (eg. parking spots)
+PIXELS_PER_FOOT = WIDTH / COURSE_AREA_WIDTH_FT
+
+# Parking spot (typical) dimensions in feet (width x length)
+PARKING_SPOT_WIDTH_FT = 9
+PARKING_SPOT_LENGTH_FT = 18
+PARKING_SPOT_COLOR = WHITE
