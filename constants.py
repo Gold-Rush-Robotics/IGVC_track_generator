@@ -1,6 +1,6 @@
 # Screen dimensions
-WIDTH = 1000 
-HEIGHT = 1000
+WIDTH = 1920 
+HEIGHT = 1080
 
 ###
 # Drawing
@@ -14,6 +14,8 @@ RED = [255, 0, 0]
 BLUE = [0, 0, 255]
 GRASS_GREEN = [58, 156, 53]
 GREY = [186, 182, 168]
+BACKGROUND_COLOR = BLACK
+TRACK_COLOR = WHITE
 
 CHECKPOINT_POINT_ANGLE_OFFSET = 3
 CHECKPOINT_MARGIN = 5
@@ -24,26 +26,26 @@ CHECKPOINT_MARGIN = 5
 
 # Boundaries for the numbers of points that will be randomly 
 # generated to define the initial polygon used to build the track
-MIN_POINTS = 20
-MAX_POINTS = 30
+MIN_POINTS = 4
+MAX_POINTS = 6
 
 SPLINE_POINTS = 1000
 
 # Margin between screen limits and any of the points that shape the
 # initial polygon
-MARGIN = 50
+MARGIN = 200
 # minimum distance between points that form the track skeleton
-MIN_DISTANCE = 20
+MIN_DISTANCE = 400
 # Maximum midpoint displacement for points placed after obtaining the initial polygon
 MAX_DISPLACEMENT = 80
 # Track difficulty
 DIFFICULTY = 0.1
 # min distance between two points that are part of thr track skeleton
-DISTANCE_BETWEEN_POINTS = 20
+DISTANCE_BETWEEN_POINTS = 400
 # Maximum corner allowed angle
 MAX_ANGLE = 90
 
-TRACK_WIDTH = 40
+TRACK_BORDER_FT = 0.5  # 6 inches in feet
 
 ###
 # 3D Model parameters
@@ -83,3 +85,41 @@ COOL_TRACK_SEEDS = [
     95894, 
     95521
 ]
+
+###
+# IGVC-specific parameters
+###
+# Course dimensions (approximate, in feet)
+COURSE_LENGTH_FT = 500
+COURSE_AREA_WIDTH_FT = 120
+COURSE_AREA_DEPTH_FT = 100
+
+# A simple conversion from canvas pixels to feet based on the IGVC area width
+# This can be used to draw a scale or elements sized in feet (eg. parking spots)
+PIXELS_PER_FOOT = WIDTH / COURSE_AREA_WIDTH_FT
+
+# Track width limits (feet)
+TRACK_WIDTH_MIN_FT = 10
+TRACK_WIDTH_MAX_FT = 20
+
+# Track width in pixels (derived from feet)
+TRACK_WIDTH_MIN = int(TRACK_WIDTH_MIN_FT * PIXELS_PER_FOOT)
+TRACK_WIDTH_MAX = int(TRACK_WIDTH_MAX_FT * PIXELS_PER_FOOT)
+
+# Minimum turning radius (feet)
+TURN_RADIUS_MIN_FT = 5
+
+# Maximum ramp gradient (%)
+RAMP_MAX_GRADE_PERCENT = 15
+
+# Speed limits (mph)
+MIN_SPEED_MPH = 1
+MAX_SPEED_MPH = 5
+
+# Run time limit (minutes)
+RUN_TIME_MINUTES = 6
+
+# Parking spot (typical) dimensions in feet (width x length)
+PARKING_SPOT_WIDTH_FT = 9
+PARKING_SPOT_LENGTH_FT = 18
+PARKING_SPOT_COLOR = WHITE
