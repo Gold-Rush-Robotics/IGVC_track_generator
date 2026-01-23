@@ -177,14 +177,60 @@ def draw_single_line(surface, color, init, end):
     pygame.draw.line(surface, color, init, end)
 
 def draw_track(surface, color, points, corners):
-    radius = TRACK_WIDTH // 2
-    # draw track
-    chunk_dimensions = (radius * 2, radius * 2)
-    for point in points:
+    # draw track with white border and black interior
+    border_width = int(TRACK_BORDER_FT * PIXELS_PER_FOOT)
+    
+    # First pass: draw white border (full width)
+    for i, point in enumerate(points):
+        # Vary track width along the path
+        progress = i / len(points)
+        width = TRACK_WIDTH_MIN + (TRACK_WIDTH_MAX - TRACK_WIDTH_MIN) * (0.5 + 0.5 * math.sin(progress * 4 * math.pi))
+        radius = int(width // 2)
+        chunk_dimensions = (radius * 2, radius * 2)
         blit_pos = (point[0] - radius, point[1] - radius)
         track_chunk = pygame.Surface(chunk_dimensions, pygame.SRCALPHA)
-        pygame.draw.circle(track_chunk, color, (radius, radius), radius)
+        pygame.draw.circle(track_chunk, WHITE, (radius, radius), radius)
         surface.blit(track_chunk, blit_pos)
+    
+    # Second pass: draw black interior (with border offset)
+    for i, point in enumerate(points):
+        # Vary track width along the path
+        progress = i / len(points)
+        width = TRACK_WIDTH_MIN + (TRACK_WIDTH_MAX - TRACK_WIDTH_MIN) * (0.5 + 0.5 * math.sin(progress * 4 * math.pi))
+        inner_radius = int((width // 2) - border_width)
+        if inner_radius > 0:
+            chunk_dimensions = (inner_radius * 2, inner_radius * 2)
+            blit_pos = (point[0] - inner_radius, point[1] - inner_radius)
+            track_chunk = pygame.Surface(chunk_dimensions, pygame.SRCALPHA)
+            pygame.draw.circle(track_chunk, BLACK, (inner_radius, inner_radius), inner_radius)
+            surface.blit(track_chunk, blit_pos)
+
+def draw_parking_spots(surface, count=4, start_x=10, margin=10):
+    # draw parking spots distributed throughout the course
+    spot_w = max(1, int(PARKING_SPOT_WIDTH_FT * PIXELS_PER_FOOT))
+    spot_h = max(1, int(PARKING_SPOT_LENGTH_FT * PIXELS_PER_FOOT))
+    
+    # Draw parking spots in multiple locations around the track
+    positions = [
+        (start_x, HEIGHT - margin - spot_h),  # bottom-left
+        (WIDTH - start_x - spot_w, HEIGHT - margin - spot_h),  # bottom-right
+        (start_x, start_x),  # top-left
+        (WIDTH - start_x - spot_w, start_x),  # top-right
+    ]
+    
+    for i, (x, y) in enumerate(positions[:count]):
+        rect = pygame.Rect(x, y, spot_w, spot_h)
+        pygame.draw.rect(surface, PARKING_SPOT_COLOR, rect, 2)
+    
+    # draw a small label-like scale bar (no font needed)
+    bar_w = max(1, int(10 * PIXELS_PER_FOOT))
+    bar_h = 4
+    bar_x = start_x
+    bar_y = HEIGHT - margin - spot_h - margin - bar_h
+    pygame.draw.rect(surface, PARKING_SPOT_COLOR, (bar_x, bar_y, bar_w, bar_h))
+    # draw bar endpoints
+    pygame.draw.line(surface, PARKING_SPOT_COLOR, (bar_x, bar_y - 4), (bar_x, bar_y + bar_h + 4), 1)
+    pygame.draw.line(surface, PARKING_SPOT_COLOR, (bar_x + bar_w, bar_y - 4), (bar_x + bar_w, bar_y + bar_h + 4), 1)
 
 def draw_rectangle(dimensions, color, line_thickness=1, fill=False):
     filled = line_thickness
@@ -197,7 +243,7 @@ def draw_rectangle(dimensions, color, line_thickness=1, fill=False):
 def draw_checkpoint(track_surface, points, checkpoint, debug=False):
     # given the main point of a checkpoint, compute and draw the checkpoint box
     margin = CHECKPOINT_MARGIN
-    radius = TRACK_WIDTH // 2 + margin
+    radius = TRACK_WIDTH_MIN // 2 + margin
     offset = CHECKPOINT_POINT_ANGLE_OFFSET
     check_index = points.index(checkpoint)
     vec_p = [points[check_index + offset][1] - points[check_index][1], -(points[check_index+offset][0] - points[check_index][0])]
@@ -216,11 +262,11 @@ def save_track_svg(points, filename="track.svg"):
     # Create new SVG document
     dwg = svgwrite.Drawing(filename, size=(WIDTH, HEIGHT))
     
-    # Add background
-    dwg.add(dwg.rect(insert=(0, 0), size=(WIDTH, HEIGHT), fill=f'rgb({GRASS_GREEN[0]},{GRASS_GREEN[1]},{GRASS_GREEN[2]})'))
+    # Add black background
+    dwg.add(dwg.rect(insert=(0, 0), size=(WIDTH, HEIGHT), fill=f'rgb({BACKGROUND_COLOR[0]},{BACKGROUND_COLOR[1]},{BACKGROUND_COLOR[2]})'))
     
-    # Create a path for the track
-    path = dwg.path(fill="none")
+    # Create a path for the track with black fill and white border
+    path = dwg.path(fill=f'rgb({BLACK[0]},{BLACK[1]},{BLACK[2]})')
     
     # Move to first point
     path.push(f'M {points[0][0]} {points[0][1]}')
@@ -232,9 +278,10 @@ def save_track_svg(points, filename="track.svg"):
     # Close the path
     path.push('Z')
     
-    # Add the path with a stroke width equal to track width
-    path['stroke-width'] = TRACK_WIDTH
-    path['stroke'] = f'rgb({GREY[0]},{GREY[1]},{GREY[2]})'
+    # Add the path with average track width and white stroke
+    avg_track_width = (TRACK_WIDTH_MIN + TRACK_WIDTH_MAX) / 2
+    path['stroke-width'] = 2
+    path['stroke'] = f'rgb({TRACK_COLOR[0]},{TRACK_COLOR[1]},{TRACK_COLOR[2]})'
     path['stroke-linejoin'] = 'round'  # Round the corners
     path['stroke-linecap'] = 'round'   # Round the line ends
     
@@ -247,7 +294,7 @@ def save_track_openscad(points, filename="track.scad"):
     
     # Buffer the line to create a polygon representing the track area
     # The buffer distance is half the track width
-    track_polygon = line.buffer(TRACK_WIDTH / 2)
+    track_polygon = line.buffer((TRACK_WIDTH_MIN + TRACK_WIDTH_MAX) / 4)
     
     # Get the coordinates of the outer and inner boundaries
     outer_coords = list(track_polygon.exterior.coords)
@@ -334,7 +381,7 @@ def convert_scad_to_stl(scad_filename="track.scad", stl_filename="track.stl"):
 def main(debug=True, draw_checkpoints_in_track=True):
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    background_color = GRASS_GREEN
+    background_color = BACKGROUND_COLOR
     screen.fill(background_color)
 
     # generate the track
@@ -342,8 +389,8 @@ def main(debug=True, draw_checkpoints_in_track=True):
     hull = ConvexHull(points)
     track_points = shape_track(get_track_points(hull, points))
     f_points = smooth_track(track_points)
-    # draw the actual track
-    draw_track(screen, GREY, f_points, None)
+    # draw the actual track with white outline
+    draw_track(screen, TRACK_COLOR, f_points, None)
     # draw checkpoints
     checkpoints = get_checkpoints(f_points)
     if draw_checkpoints_in_track or debug:
